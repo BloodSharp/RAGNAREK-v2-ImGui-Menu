@@ -1,12 +1,12 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_dx11.h"
+#include "../Imgui/imgui.h"
+#include "../backends/imgui_impl_win32.h"
+#include "../backends/imgui_impl_dx11.h"
 
 
-#include "imgui_edited.hpp"
-#include "imgui_freetype.h"
+#include "../Imgui/imgui_edited.hpp"
+//#include "imgui_freetype.h"
 
 #include <d3d11.h>
 #include <tchar.h>
@@ -93,7 +93,7 @@ int main(int, char**)
 
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_POPUP, 0, 0, 1920, 1080, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 0, 0, 1280, 960, nullptr, nullptr, wc.hInstance, nullptr);
 
     if (!CreateDeviceD3D(hwnd))
     {
@@ -112,19 +112,19 @@ int main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;     
 
     ImFontConfig cfg;
-    cfg.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_ForceAutoHint | ImGuiFreeTypeBuilderFlags_LightHinting | ImGuiFreeTypeBuilderFlags_LoadColor | ImGuiFreeTypeBuilderFlags_Bitmap;
-
+    //cfg.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_ForceAutoHint | ImGuiFreeTypeBuilderFlags_LightHinting | ImGuiFreeTypeBuilderFlags_LoadColor | ImGuiFreeTypeBuilderFlags_Bitmap;
     font::inter_element = io.Fonts->AddFontFromMemoryTTF(inter_semibold, sizeof(inter_semibold), 12.f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     font::inter_child = io.Fonts->AddFontFromMemoryTTF(inter_semibold, sizeof(inter_semibold), 14.f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
 
     font::icomoon = io.Fonts->AddFontFromMemoryTTF(icomoon, sizeof(icomoon), 19.f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     font::icomoon_tabs = io.Fonts->AddFontFromMemoryTTF(icomoon, sizeof(icomoon), 22.f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     font::icomoon_widget = io.Fonts->AddFontFromMemoryTTF(icomoon, sizeof(icomoon), 16.f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
-
+    /*
     D3DX11_IMAGE_LOAD_INFO info; ID3DX11ThreadPump* pump{ nullptr };
     if (image::background_preview == nullptr) D3DX11CreateShaderResourceViewFromMemory(g_pd3dDevice, background, sizeof(background), &info, pump, &image::background_preview, 0);
     if (image::preview_model == nullptr) D3DX11CreateShaderResourceViewFromMemory(g_pd3dDevice, preview_model, sizeof(preview_model), &info, pump, &image::preview_model, 0);
     if (image::logo == nullptr) D3DX11CreateShaderResourceViewFromMemory(g_pd3dDevice, logo, sizeof(logo), &info, pump, &image::logo, 0);
+    */
 
   //  ImGui::StyleColorsLight();
 
@@ -160,6 +160,9 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         {
+            edited::ParticlesPhysics();
+
+
             ImGuiStyle* style = &ImGui::GetStyle();
 
             static float color[4] = { 112 / 255.f, 109 / 255.f, 214 / 255.f, 1.f };
@@ -203,6 +206,8 @@ int main(int, char**)
 
             ImGui::Begin("RAGNAREK", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
             {
+                edited::Particles();
+
                 const ImVec2& pos = ImGui::GetWindowPos();
                 const ImVec2& region = ImGui::GetContentRegionMax();
                 const ImVec2& spacing = style->ItemSpacing;
@@ -210,10 +215,10 @@ int main(int, char**)
                 ImGui::GetBackgroundDrawList()->AddRectFilled(pos, pos + ImVec2(c::bg::size), ImGui::GetColorU32(c::bg::background), c::bg::rounding + 1);
                 ImGui::GetBackgroundDrawList()->AddRectFilled(pos, pos + ImVec2(100, c::bg::size.y), ImGui::GetColorU32(c::bg::border), c::bg::rounding, ImDrawFlags_RoundCornersLeft);
 
-                ImGui::GetBackgroundDrawList()->AddImage(image::logo, pos + (ImVec2(100, 100) - ImVec2(38, 43)) / 2, pos + (ImVec2(100, 100) + ImVec2(38, 43)) / 2, ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(c::accent_color));
+                //ImGui::GetBackgroundDrawList()->AddImage(image::logo, pos + (ImVec2(100, 100) - ImVec2(38, 43)) / 2, pos + (ImVec2(100, 100) + ImVec2(38, 43)) / 2, ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(c::accent_color));
 
                 ImGui::GetBackgroundDrawList()->AddLine(pos + ImVec2(0, 100), pos + ImVec2(100, 100), ImGui::GetColorU32(c::widget::background), 1.f);
-
+                
                 static int page = 0;
 
                 ImGui::SetCursorPos(ImVec2((100 - 47) / 2, 100 + (47 / 2) ));
@@ -447,7 +452,7 @@ int main(int, char**)
                         {
                             edited::BeginChild("ESP PREVIEW", ImVec2(c::bg::size.x - (100 + spacing.x * 3), 0) / 2);
                             {
-                                edited::esp_preview(image::preview_model,
+                                edited::esp_preview(0,//image::preview_model,
                                 &esp_preview::nickname, esp_preview::nick_color,
                                 &esp_preview::weapon, esp_preview::weapon_color,
                                 &esp_preview::hp, esp_preview::hp_color,
@@ -545,10 +550,10 @@ int main(int, char**)
                 ImGui::PopStyleVar();
 
                 static float ibar_size = ImGui::CalcTextSize(cheat_name).x + ImGui::CalcTextSize("|").x + ImGui::CalcTextSize(developer).x + ImGui::CalcTextSize("|").x + ImGui::CalcTextSize(ping).x + ImGui::CalcTextSize("|").x + ImGui::CalcTextSize(world_time).x + (style->ItemSpacing.x * 8);
-                static float position = (GetSystemMetrics(SM_CXSCREEN) - ibar_size) / 2;
+                static float position = (ImGui::GetIO().DisplaySize.x - ibar_size) / 2;
                 position = ImLerp(position, info_bar ? position : GetSystemMetrics(SM_CXSCREEN), ImGui::GetIO().DeltaTime * 8.f);
 
-                if (position <= (GetSystemMetrics(SM_CXSCREEN) - 2)) {
+                if (position <= (ImGui::GetIO().DisplaySize.x - 2)) {
 
                     ImGui::SetNextWindowPos(ImVec2(position, 5));
                     ImGui::SetNextWindowSize(ImVec2(ibar_size, 45));

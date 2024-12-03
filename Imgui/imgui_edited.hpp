@@ -1,22 +1,30 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 
-#include <imgui_internal.h>
+#include "imgui_internal.h"
 #include "imgui_settings.h"
 #include "imstb_textedit.h"
 
 #include <cstdlib>
-#include <imgui.h>
+#include "imgui.h"
 
-#include <D3DX11tex.h>
-#pragma comment(lib, "D3DX11.lib")
+//#include <D3DX11tex.h>
+//#pragma comment(lib, "D3DX11.lib")
 
 #include <map>
 
 #include <string>
 #include <wtypes.h>
 
+namespace ImGui
+{
+    ImU32 GetColorU32(const ImVec4& col, float alpha_mul);
+}
+
 namespace edited
 {
+    void ParticlesPhysics();
+    void Particles();
+
     bool           BeginChild(ImGuiID id, const ImVec2& size = ImVec2(0, 0), ImGuiChildFlags child_flags = 0, ImGuiWindowFlags window_flags = 0);
     bool           BeginChild(const char* str_id, const ImVec2& size = ImVec2(0, 0), ImGuiChildFlags child_flags = 0, ImGuiWindowFlags window_flags = 0);
     void           EndChild();

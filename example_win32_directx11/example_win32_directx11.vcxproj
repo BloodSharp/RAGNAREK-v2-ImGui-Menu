@@ -124,6 +124,8 @@
       <AdditionalIncludeDirectories>..\..;..\..\backends;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -143,7 +145,8 @@
       <AdditionalIncludeDirectories>..\..;..\..\backends;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -155,35 +158,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\imconfig.h" />
-    <ClInclude Include="..\..\imgui.h" />
-    <ClInclude Include="..\..\imgui_edited.hpp" />
-    <ClInclude Include="..\..\imgui_freetype.h" />
-    <ClInclude Include="..\..\imgui_internal.h" />
     <ClInclude Include="..\..\backends\imgui_impl_dx11.h" />
-    <ClInclude Include="..\..\backends\imgui_impl_win32.h" />
-    <ClInclude Include="..\..\imgui_settings.h" />
+    <ClInclude Include="..\Imgui\imconfig.h" />
+    <ClInclude Include="..\Imgui\imgui.h" />
+    <ClInclude Include="..\Imgui\imgui_edited.hpp" />
     <ClInclude Include="font.h" />
     <ClInclude Include="image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\imgui.cpp" />
-    <ClCompile Include="..\..\imgui_draw.cpp" />
-    <ClCompile Include="..\..\imgui_edited.cpp" />
-    <ClCompile Include="..\..\imgui_freetype.cpp" />
-    <ClCompile Include="..\..\imgui_tables.cpp" />
-    <ClCompile Include="..\..\imgui_widgets.cpp" />
-    <ClCompile Include="..\..\backends\imgui_impl_dx11.cpp" />
-    <ClCompile Include="..\..\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\Imgui\imgui.cpp" />
+    <ClCompile Include="..\Imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\Imgui\imgui_edited.cpp" />
+    <ClCompile Include="..\Imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\Imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\misc\debuggers\imgui.natstepfilter" />
     <None Include="..\..\misc\debuggers\imgui.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\freetype\win64\freetype.lib" />
-    <Library Include="..\..\SDK\Lib\x64\d3dx11.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

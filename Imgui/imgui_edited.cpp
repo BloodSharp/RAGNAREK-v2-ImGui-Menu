@@ -3,6 +3,14 @@
 
 using namespace ImGui;
 
+ImU32 ImGui::GetColorU32(const ImVec4& col, float alpha_mul)
+{
+    ImGuiStyle& style = GImGui->Style;
+    ImVec4 c = col;
+    c.w *= style.Alpha * alpha_mul;
+    return ColorConvertFloat4ToU32(c);
+}
+
 namespace font
 {
     extern ImFont* inter_child;
@@ -14,11 +22,52 @@ namespace font
 
 namespace image
 {
-    extern ID3D11ShaderResourceView* preview_model;
+    //extern ID3D11ShaderResourceView* preview_model;
 }
 
 namespace edited
 {
+    static ImVec2 partile_pos[100];
+    static ImVec2 partile_target_pos[100];
+    static float partile_speed[100];
+    static float partile_radius[100];
+
+    void ParticlesPhysics()
+    {
+        ImVec2 screen_size = { (float)GetSystemMetrics(SM_CXSCREEN), (float)GetSystemMetrics(SM_CYSCREEN) };
+
+        for (int i = 1; i < 100; i++)
+        {
+            if (partile_pos[i].x == 0 || partile_pos[i].y == 0)
+            {
+                partile_pos[i].x = rand() % (int)screen_size.x + 1;
+                partile_pos[i].y = 15.f;
+                partile_speed[i] = 1 + rand() % 25;
+                partile_radius[i] = rand() % 4;
+
+                partile_target_pos[i].x = rand() % (int)screen_size.x;
+                partile_target_pos[i].y = screen_size.y * 2;
+            }
+
+            partile_pos[i] = ImLerp(partile_pos[i], partile_target_pos[i], ImGui::GetIO().DeltaTime * (partile_speed[i] / 60));
+
+            if (partile_pos[i].y > screen_size.y)
+            {
+                partile_pos[i].x = 0;
+                partile_pos[i].y = 0;
+            }
+        }
+    }
+
+    void Particles()
+    {
+        for (int i = 1; i < 100; i++)
+        {
+            //ImGui::GetWindowDrawList()->AddCircleFilled(partile_pos[i], partile_radius[i], ImColor(114, 149, 255));
+            ImGui::GetWindowDrawList()->AddCircleFilled(partile_pos[i], partile_radius[i], ImColor(114, 149, 255));
+        }
+    }
+
 
 
     void TextCenter(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, const char* text, const ImVec2& align)
@@ -300,7 +349,7 @@ namespace edited
         {
             if (g.ActiveId != id) {
                 memset(io.MouseDown, 0, sizeof(io.MouseDown));
-                memset(io.KeysDown, 0, sizeof(io.KeysDown));
+                //memset(io.KeysDown, 0, sizeof(io.KeysDown));
                 *key = 0;
             }
             ImGui::SetActiveID(id, window);
@@ -337,7 +386,7 @@ namespace edited
             }
             if (!value_changed) {
                 for (auto i = 0x08; i <= 0xA5; i++) {
-                    if (io.KeysDown[i]) {
+                    if (IsKeyDown((ImGuiKey)i)) {
                         k = i;
                         value_changed = true;
                         ImGui::ClearActiveID();
@@ -345,7 +394,7 @@ namespace edited
                 }
             }
 
-            if (IsKeyPressedMap(ImGuiKey_Escape)) {
+            if (IsKeyPressed(ImGuiKey_Escape)) {
                 *key = 0;
                 ImGui::ClearActiveID();
             }
@@ -731,7 +780,7 @@ namespace edited
         PopClipRect();
 
         GetWindowDrawList()->AddRectFilled(rect.Max - ImVec2(y_size, y_size), rect.Max, GetColorU32(it_anim->second.background), c::widget::rounding);
-        GetWindowDrawList()->AddRectFilledMultiColor(rect.Max - ImVec2(150, y_size), rect.Max, GetColorU32(c::widget::background, 0.f), GetColorU32(c::widget::background, 1.f), GetColorU32(c::widget::background, 1.f), GetColorU32(c::widget::background, 0.f), c::widget::rounding);
+        //GetWindowDrawList()->AddRectFilledMultiColor(rect.Max - ImVec2(150, y_size), rect.Max, GetColorU32(c::widget::background, 0.f), GetColorU32(c::widget::background, 1.f), GetColorU32(c::widget::background, 1.f), GetColorU32(c::widget::background, 0.f), c::widget::rounding);
 
         ImRotateStart();
         PushFont(font::icomoon);
@@ -1007,7 +1056,7 @@ namespace edited
         if (flags & ImGuiSelectableFlags_SelectOnClick) { button_flags |= ImGuiButtonFlags_PressedOnClick; }
         if (flags & ImGuiSelectableFlags_SelectOnRelease) { button_flags |= ImGuiButtonFlags_PressedOnRelease; }
         if (flags & ImGuiSelectableFlags_AllowDoubleClick) { button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick; }
-        if ((flags & ImGuiSelectableFlags_AllowOverlap) || (g.LastItemData.InFlags & ImGuiItemFlags_AllowOverlap)) { button_flags |= ImGuiButtonFlags_AllowOverlap; }
+        if ((flags & ImGuiSelectableFlags_AllowOverlap) || (g.LastItemData.ItemFlags & ImGuiItemFlags_AllowOverlap)) { button_flags |= ImGuiButtonFlags_AllowOverlap; }
 
         const bool was_selected = selected;
         bool hovered, held, pressed = ButtonBehavior(bb, id, &hovered, &held, button_flags);
@@ -1018,10 +1067,10 @@ namespace edited
         // Update NavId when clicking or when Hovering (this doesn't happen on most widgets), so navigation can be resumed with gamepad/keyboard
         if (pressed || (hovered && (flags & ImGuiSelectableFlags_SetNavIdOnHover)))
         {
-            if (!g.NavDisableMouseHover && g.NavWindow == window && g.NavLayer == window->DC.NavLayerCurrent)
+            if (!g.NavHighlightItemUnderNav && g.NavWindow == window && g.NavLayer == window->DC.NavLayerCurrent)
             {
                 SetNavID(id, window->DC.NavLayerCurrent, g.CurrentFocusScopeId, WindowRectAbsToRel(window, bb)); // (bb == NavRect)
-                g.NavDisableHighlight = true;
+                g.NavCursorVisible = false;
             }
         }
         if (pressed) MarkItemEdited(id);
@@ -1029,7 +1078,7 @@ namespace edited
         if (selected != was_selected)  g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
 
 
-        if (g.NavId == id) RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
+        if (g.NavId == id) RenderNavHighlight(bb, id, /*ImGuiNavHighlightFlags_TypeThin |*/ ImGuiNavHighlightFlags_NoRounding);
 
         if (span_all_columns && window->DC.CurrentColumns) PopColumnsBackground();
         else if (span_all_columns && g.CurrentTable) TablePopBackgroundChannel();
@@ -1054,7 +1103,7 @@ namespace edited
 
 
 
-        if (pressed && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_DontClosePopups) && !(g.LastItemData.InFlags & ImGuiItemFlags_SelectableDontClosePopup)) CloseCurrentPopup();
+        if (pressed && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_DontClosePopups) && !(g.LastItemData.ItemFlags & ImGuiItemFlags_AutoClosePopups)) CloseCurrentPopup();
 
         if (disabled_item && !disabled_global) EndDisabled();
 
@@ -1166,7 +1215,7 @@ namespace edited
 
         if (format == NULL) format = DataTypeGetInfo(data_type)->PrintFmt;
 
-        bool hovered = ItemHoverable(slider_active, id, g.LastItemData.InFlags), held, pressed = ButtonBehavior(slider_active, id, &hovered, &held, NULL);
+        bool hovered = ItemHoverable(slider_active, id, g.LastItemData.ItemFlags), held, pressed = ButtonBehavior(slider_active, id, &hovered, &held, NULL);
         bool temp_input_is_active = temp_input_allowed && TempInputIsActive(id);
 
         if (temp_input_is_active)
@@ -1446,7 +1495,7 @@ static inline float SliderBehaviorCalcRatioFromValue(float v, float v_min, float
             return false;
         }
 
-        const bool hovered = ItemHoverable(slider_active, id, g.LastItemData.InFlags);
+        const bool hovered = ItemHoverable(slider_active, id, g.LastItemData.ItemFlags);
 
         if (hovered) SetHoveredID(id);
 
@@ -1580,7 +1629,7 @@ static inline float SliderBehaviorCalcRatioFromValue(float v, float v_min, float
         }
 
         GetWindowDrawList()->AddCircleFilled(rect.Min + ImVec2(size / 2), size.x / 2, GetColorU32(color_bg), 30.f);
-        GetWindowDrawList()->AddShadowCircle(rect.Min + ImVec2(size / 2), size.x / 2, GetColorU32(color_bg), 18.f, ImVec2(0, 0), 30.f);
+        //GetWindowDrawList()->AddShadowCircle(rect.Min + ImVec2(size / 2), size.x / 2, GetColorU32(color_bg), 18.f, ImVec2(0, 0), 30.f);
 
         GetWindowDrawList()->AddCircle(rect.Min + ImVec2(size / 2), size.x / 3, GetColorU32(c::black_color, 0.3f), 30.f, 3.f);
 
@@ -2055,13 +2104,13 @@ static inline float SliderBehaviorCalcRatioFromValue(float v, float v_min, float
 
         ImVec2 sv_cursor_pos;
 
-        draw_list->AddRectFilledMultiColor(picker_pos, picker_pos + ImVec2(sv_picker_size, sv_picker_size), col_white, hue_color32, hue_color32, col_white, 5.f);
-        draw_list->AddRectFilledMultiColor(picker_pos - ImVec2(1, 1), picker_pos + ImVec2(sv_picker_size + 1, sv_picker_size + 1), 0, 0, col_black, col_black, 5.f);
+        //draw_list->AddRectFilledMultiColor(picker_pos, picker_pos + ImVec2(sv_picker_size, sv_picker_size), col_white, hue_color32, hue_color32, col_white, 5.f);
+        //draw_list->AddRectFilledMultiColor(picker_pos - ImVec2(1, 1), picker_pos + ImVec2(sv_picker_size + 1, sv_picker_size + 1), 0, 0, col_black, col_black, 5.f);
 
         sv_cursor_pos.x = ImClamp(IM_ROUND(picker_pos.x + ImSaturate(S) * sv_picker_size), picker_pos.x + 2, picker_pos.x + sv_picker_size - 2);
         sv_cursor_pos.y = ImClamp(IM_ROUND(picker_pos.y + ImSaturate(1 - V) * sv_picker_size), picker_pos.y + 2, picker_pos.y + sv_picker_size - 2);
 
-        for (int i = 0; i < 6; ++i) draw_list->AddRectFilledMultiColor(ImVec2(bar0_pos_x, picker_pos.y + i * (sv_picker_size / 6) - (i == 5 ? 1 : 0)), ImVec2(bar0_pos_x + bars_width, picker_pos.y + (i + 1) * (sv_picker_size / 6) + (i == 0 ? 1 : 0)), col_hues[i], col_hues[i], col_hues[i + 1], col_hues[i + 1], 10.f, i == 0 ? ImDrawFlags_RoundCornersTop : i == 5 ? ImDrawFlags_RoundCornersBottom : ImDrawFlags_RoundCornersNone);
+        //for (int i = 0; i < 6; ++i) draw_list->AddRectFilledMultiColor(ImVec2(bar0_pos_x, picker_pos.y + i * (sv_picker_size / 6) - (i == 5 ? 1 : 0)), ImVec2(bar0_pos_x + bars_width, picker_pos.y + (i + 1) * (sv_picker_size / 6) + (i == 0 ? 1 : 0)), col_hues[i], col_hues[i], col_hues[i + 1], col_hues[i + 1], 10.f, i == 0 ? ImDrawFlags_RoundCornersTop : i == 5 ? ImDrawFlags_RoundCornersBottom : ImDrawFlags_RoundCornersNone);
 
         float bar0_line_y = IM_ROUND(picker_pos.y + H * sv_picker_size);
         bar0_line_y = ImClamp(bar0_line_y, picker_pos.y + 3.f, picker_pos.y + (sv_picker_size - 13));
@@ -2082,7 +2131,7 @@ static inline float SliderBehaviorCalcRatioFromValue(float v, float v_min, float
             float alpha = ImSaturate(col[3]);
             ImRect bar1_bb(bar1_pos_x, picker_pos.y, bar1_pos_x + bars_width, picker_pos.y + sv_picker_size);
 
-            draw_list->AddRectFilledMultiColor(bar1_bb.Min, bar1_bb.Max, user_col32_striped_of_alpha, user_col32_striped_of_alpha, user_col32_striped_of_alpha & ~IM_COL32_A_MASK, user_col32_striped_of_alpha & ~IM_COL32_A_MASK, 100.f);
+            //draw_list->AddRectFilledMultiColor(bar1_bb.Min, bar1_bb.Max, user_col32_striped_of_alpha, user_col32_striped_of_alpha, user_col32_striped_of_alpha & ~IM_COL32_A_MASK, user_col32_striped_of_alpha & ~IM_COL32_A_MASK, 100.f);
 
             float bar1_line_y = IM_ROUND(picker_pos.y + (1.0f - alpha) * sv_picker_size);
             bar1_line_y = ImClamp(bar1_line_y, picker_pos.y + 3.f, picker_pos.y + (sv_picker_size - 13));
@@ -2175,7 +2224,7 @@ static inline float SliderBehaviorCalcRatioFromValue(float v, float v_min, float
         int hp_result = 307 * *hp / 100;
 
 
-        GetWindowDrawList()->AddImage(image::preview_model, player.Min, player.Max, ImVec2(0, 0), ImVec2(1, 1), GetColorU32(c::while_color));
+        //GetWindowDrawList()->AddImage(image::preview_model, player.Min, player.Max, ImVec2(0, 0), ImVec2(1, 1), GetColorU32(c::while_color));
 
         if (*esp_box)  GetWindowDrawList()->AddRect(box.Min, box.Max, GetColorU32(it_anim->second.box_color), 0.f, NULL, 2.f);
         if (*hp_line)  GetWindowDrawList()->AddLine(box.Min + ImVec2(-10, 0), box.Min + ImVec2(-10, 307), GetColorU32(c::widget::selectable), 3.f);

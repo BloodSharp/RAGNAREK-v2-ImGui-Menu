@@ -9,26 +9,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\backends\imgui_impl_win32.h">
-      <Filter>sources</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\backends\imgui_impl_dx11.h">
       <Filter>sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\imgui_freetype.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\imgui_settings.h">
-      <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="font.h">
       <Filter>sources</Filter>
@@ -36,37 +18,40 @@
     <ClInclude Include="image.h">
       <Filter>sources</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\imgui_edited.hpp">
+    <ClInclude Include="..\Imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imgui_edited.hpp">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imgui.h">
       <Filter>imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\imgui_draw.cpp">
+    <ClCompile Include="..\Imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\imgui_widgets.cpp">
+    <ClCompile Include="..\Imgui\imgui_draw.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\backends\imgui_impl_win32.cpp">
+    <ClCompile Include="..\Imgui\imgui_edited.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\backends\imgui_impl_dx11.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\backends\imgui_impl_dx11.cpp">
+    <ClCompile Include="..\backends\imgui_impl_win32.cpp">
       <Filter>sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_tables.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_freetype.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_edited.cpp">
-      <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,13 +61,5 @@
     <None Include="..\..\misc\debuggers\imgui.natstepfilter">
       <Filter>imgui</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\freetype\win64\freetype.lib">
-      <Filter>imgui</Filter>
-    </Library>
-    <Library Include="..\..\SDK\Lib\x64\d3dx11.lib">
-      <Filter>imgui</Filter>
-    </Library>
   </ItemGroup>
 </Project>
